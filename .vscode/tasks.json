@@ -1,0 +1,44 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+          "label": "Build U-Boot",
+          "type": "shell",
+          "command": "make CROSS_COMPILE=/opt/powerpc-e500v2-toolchain/bin/powerpc-linux- --directory=${workspaceFolder} && mkimage -A arm -O linux -T kernel -C none -a 0xeff80000 -e 0xeffff000 -n \"U-Boot\" -d u-boot-nodtb.bin u-boot-nodtb.uImage",
+          "problemMatcher": {
+            "base": "$gcc",
+            "fileLocation": ["relative", "${workspaceFolder}"]
+          },
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          }
+        },
+        {
+          "label": "Run QEMU",
+          "type": "shell",
+          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-ppc -M ppce500 -m 1G -bios ${workspaceFolder}/u-boot-nodtb.uImage -serial stdio -trace ppce500_* -plugin ~/Projects/qemu/build-full/contrib/plugins/libexeclog.so -s -S",
+          "dependsOn": ["Build U-Boot"],
+          "isBackground": true,
+          "problemMatcher": [
+            {
+              "pattern": [
+                {
+                  "regexp": ".",
+                  "file": 1,
+                  "location": 2,
+                  "message": 3
+                }
+              ],
+              "background": {
+                "activeOnStart": true,
+                "beginsPattern": ".",
+                "endsPattern": "QEMU RTOSdemo started",
+              }
+            }
+          ]
+        }
+    ]
+}
