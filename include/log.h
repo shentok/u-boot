@@ -132,7 +132,7 @@ int _log(enum log_category_t cat, enum log_level_t level, const char *file,
 #ifdef DEBUG
 #define _DEBUG	1
 #else
-#define _DEBUG	0
+#define _DEBUG	1
 #endif
 
 #ifdef CONFIG_SPL_BUILD
