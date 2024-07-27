@@ -12,7 +12,6 @@
 #include <nand.h>
 #include <i2c.h>
 #include <mmc.h>
-#include <fsl_esdhc.h>
 #include <spi_flash.h>
 #include <asm/global_data.h>
 #include "../common/qixis.h"

@@ -22,7 +22,6 @@
 #include <scsi.h>
 #include <fm_eth.h>
 #include <fsl_csu.h>
-#include <fsl_esdhc.h>
 #include <power/mc34vr500_pmic.h>
 #include "cpld.h"
 

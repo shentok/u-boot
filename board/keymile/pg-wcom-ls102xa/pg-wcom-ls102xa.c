@@ -14,7 +14,6 @@
 #include <hwconfig.h>
 #include <mmc.h>
 #include <fsl_csu.h>
-#include <fsl_esdhc.h>
 #include <fsl_ifc.h>
 #include <fsl_immap.h>
 #include <netdev.h>

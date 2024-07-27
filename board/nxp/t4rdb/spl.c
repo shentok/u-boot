@@ -16,7 +16,6 @@
 #include <ns16550.h>
 #include <nand.h>
 #include <mmc.h>
-#include <fsl_esdhc.h>
 #include <i2c.h>
 
 #include "t4rdb.h"

@@ -19,7 +19,6 @@
 #include <scsi.h>
 #include <fm_eth.h>
 #include <fsl_csu.h>
-#include <fsl_esdhc.h>
 #include <fsl_dspi.h>
 #include "../common/i2c_mux.h"
 

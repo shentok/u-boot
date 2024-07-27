@@ -18,7 +18,6 @@
 #include <mmc.h>
 #include <scsi.h>
 #include <fm_eth.h>
-#include <fsl_esdhc.h>
 #include <fsl_ifc.h>
 #include "cpld.h"
 #ifdef CONFIG_U_QE
