@@ -630,7 +630,7 @@ static void set_sysctl(struct fsl_esdhc_priv *priv, struct mmc *mmc, uint clock)
 
 	ret = readx_poll_timeout(esdhc_read32, &regs->prsstat, tmp, tmp & PRSSTAT_SDSTB, 100);
 	if (ret)
-		pr_warn("fsl_esdhc_imx: Internal clock never stabilised.\n");
+		pr_warn("fsl_esdhc_imx: Internal clock never stabilised 1.\n");
 
 	if (IS_ENABLED(CONFIG_FSL_USDHC))
 		esdhc_setbits32(&regs->vendorspec, VENDORSPEC_PEREN | VENDORSPEC_CKEN);

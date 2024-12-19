@@ -32,7 +32,7 @@
         {
           "label": "Run imx8mp-evk",
           "type": "shell",
-          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-aarch64 -M imx8mp-evk -cpu cortex-a53 -m 3G -kernel ${workspaceFolder}/u-boot-dtb.uImage -serial none -serial vc -trace memory_region_ops_* -s -S",
+          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-aarch64 -M imx8mp-evk -cpu cortex-a53 -m 3G -kernel ${workspaceFolder}/u-boot-dtb.uImage -drive file=/home/arch/Documents/imx8mpevk/sdcard.img,if=sd,bus=1,format=raw,id=mydrive -serial none -serial vc -trace memory_region_ops_* -trace sdcard* -trace sdhci* -trace imx_gpio_* -s -S",
           "dependsOn": ["Build aarch64-linux-gnu"],
           "isBackground": true,
           "problemMatcher": [
