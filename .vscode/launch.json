@@ -1,0 +1,44 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch imx8mp-evk",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/u-boot",
+            "cwd": "${workspaceFolder}",
+            "miDebuggerPath": "aarch64-linux-gnu-gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "setupCommands": [
+                {
+                    "description": "Add symbol file",
+                    "text": "add-symbol-file ${workspaceFolder}/u-boot 0xfeef4000",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "stopAtEntry": false,
+            "stopAtConnect": false,
+            "preLaunchTask": "Run imx8mp-evk"
+        },
+        {
+            "name": "Launch ppce500",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/u-boot",
+            "cwd": "${workspaceFolder}",
+            "miDebuggerPath": "/opt/powerpc-e500v2-toolchain/bin/powerpc-linux-gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "stopAtEntry": false,
+            "stopAtConnect": false,
+            "preLaunchTask": "Run ppce500"
+        }
+    ]
+}

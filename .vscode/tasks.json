@@ -1,0 +1,81 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+          "label": "Build aarch64-linux-gnu",
+          "type": "shell",
+          "command": "make CROSS_COMPILE=aarch64-linux-gnu- -j $(nproc) && mkimage -A arm -O linux -T kernel -C none -a 0x40200000 -e 0x40200000 -n \"U-Boot\" -d u-boot-dtb.bin u-boot-dtb.uImage",
+          "problemMatcher": {
+            "base": "$gcc",
+            "fileLocation": ["relative", "${workspaceFolder}"]
+          },
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          }
+        },
+        {
+          "label": "Build powerpc-linux",
+          "type": "shell",
+          "command": "make CROSS_COMPILE=/opt/powerpc-e500v2-toolchain/bin/powerpc-linux- -j $(nproc) && mkimage -A arm -O linux -T kernel -C none -a 0x11000000 -e 0x11000000 -n \"U-Boot\" -d u-boot-nodtb.bin u-boot-nodtb.uImage",
+          "problemMatcher": {
+            "base": "$gcc",
+            "fileLocation": ["relative", "${workspaceFolder}"]
+          },
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          }
+        },
+        {
+          "label": "Run imx8mp-evk",
+          "type": "shell",
+          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-aarch64 -M imx8mp-evk -cpu cortex-a53 -m 3G -kernel ${workspaceFolder}/u-boot-dtb.uImage -drive file=~/Documents/imx8mpevk/sdcard.img,if=sd,bus=1,format=raw,id=mydrive -serial none -serial vc -trace memory_region_ops__* -s -S",
+          "dependsOn": ["Build aarch64-linux-gnu"],
+          "isBackground": true,
+          "problemMatcher": [
+            {
+              "pattern": [
+                {
+                  "regexp": ".",
+                  "file": 1,
+                  "location": 2,
+                  "message": 3
+                }
+              ],
+              "background": {
+                "activeOnStart": true,
+                "beginsPattern": ".",
+                "endsPattern": "QEMU RTOSdemo started",
+              }
+            }
+          ]
+        },
+        {
+          "label": "Run ppce500",
+          "type": "shell",
+          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-ppc -M ppce500 -m 1G -bios ${workspaceFolder}/u-boot-nodtb.uImage -serial stdio -parallel none -trace ppce500_* -s -S",
+          "dependsOn": ["Build powerpc-linux"],
+          "isBackground": true,
+          "problemMatcher": [
+            {
+              "pattern": [
+                {
+                  "regexp": ".",
+                  "file": 1,
+                  "location": 2,
+                  "message": 3
+                }
+              ],
+              "background": {
+                "activeOnStart": true,
+                "beginsPattern": ".",
+                "endsPattern": "QEMU RTOSdemo started",
+              }
+            }
+          ]
+        }
+    ]
+}
