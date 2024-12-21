@@ -15,7 +15,7 @@
             "setupCommands": [
                 {
                     "description": "Add symbol file",
-                    "text": "add-symbol-file ${workspaceFolder}/u-boot 0xfeef4000",
+                    "text": "add-symbol-file ${workspaceFolder}/u-boot 0xfeef2000",
                     "ignoreFailures": false
                 },
                 {
