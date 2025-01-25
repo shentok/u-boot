@@ -19,7 +19,7 @@
         {
           "label": "Build powerpc-linux",
           "type": "shell",
-          "command": "make CROSS_COMPILE=/opt/powerpc-e500v2-toolchain/bin/powerpc-linux- -j $(nproc) && mkimage -A arm -O linux -T kernel -C none -a 0x11000000 -e 0x11000000 -n \"U-Boot\" -d u-boot-nodtb.bin u-boot-nodtb.uImage",
+          "command": "make CROSS_COMPILE=/opt/powerpc-e500v2-toolchain/bin/powerpc-linux- -j $(nproc) && qemu-img resize u-boot-with-spl.bin 1M",
           "problemMatcher": {
             "base": "$gcc",
             "fileLocation": ["relative", "${workspaceFolder}"]
@@ -56,7 +56,7 @@
         {
           "label": "Run ppce500",
           "type": "shell",
-          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-ppc -M ppce500 -m 1G -bios ${workspaceFolder}/u-boot-nodtb.uImage -device sparse-mem,baseaddr=0xffd00000,length=256000,priority=1 -serial stdio -parallel none -trace ppce500_* -s -S",
+          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-ppc -M mpc8544ds -m 1G -dtb /home/arch/Documents/ucp1020/ucp1020.dtb -drive id=mydrive,if=none,file=u-boot-with-spl.bin,format=raw -device sd-card,drive=mydrive -device sparse-mem,baseaddr=0xffd00000,length=256000,priority=1 -serial vc -parallel none -trace ppce500_* -trace memory_region_ops_* -s -S",
           "dependsOn": ["Build powerpc-linux"],
           "isBackground": true,
           "problemMatcher": [

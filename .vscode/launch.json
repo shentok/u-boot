@@ -32,7 +32,7 @@
             "name": "Launch ppce500",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/u-boot",
+            "program": "${workspaceFolder}/spl/u-boot-spl",
             "cwd": "${workspaceFolder}",
             "miDebuggerPath": "/opt/powerpc-e500v2-toolchain/bin/powerpc-linux-gdb",
             "miDebuggerServerAddress": "localhost:1234",
