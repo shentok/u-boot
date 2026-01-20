@@ -29,6 +29,25 @@
             "preLaunchTask": "Run imx8mp-evk"
         },
         {
+            "name": "Launch sabrelite",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/u-boot",
+            "cwd": "${workspaceFolder}",
+            "miDebuggerPath": "arm-none-eabi-gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "stopAtEntry": false,
+            "stopAtConnect": false,
+            "preLaunchTask": "Run sabrelite"
+        },
+        {
             "name": "Launch ppce500",
             "type": "cppdbg",
             "request": "launch",
