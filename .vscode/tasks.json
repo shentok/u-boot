@@ -17,6 +17,19 @@
           }
         },
         {
+          "label": "Build arm-none-eabi",
+          "type": "shell",
+          "command": "make CROSS_COMPILE=arm-none-eabi- -j $(nproc) && mkimage -A arm -O linux -T kernel -C none -a 0x40200000 -e 0x40200000 -n \"U-Boot\" -d u-boot-dtb.bin u-boot-dtb.uImage",
+          "problemMatcher": {
+            "base": "$gcc",
+            "fileLocation": ["relative", "${workspaceFolder}"]
+          },
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          }
+        },
+        {
           "label": "Build powerpc-linux",
           "type": "shell",
           "command": "make CROSS_COMPILE=/opt/powerpc-e500v2-toolchain/bin/powerpc-linux- -j $(nproc) && qemu-img resize u-boot-with-spl.bin 1M",
@@ -34,6 +47,30 @@
           "type": "shell",
           "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-aarch64 -M imx8mp-evk -smp 1 -kernel ${workspaceFolder}/u-boot-dtb.uImage -serial none -serial vc -trace memory_region_ops_* -s -S",
           "dependsOn": ["Build aarch64-linux-gnu"],
+          "isBackground": true,
+          "problemMatcher": [
+            {
+              "pattern": [
+                {
+                  "regexp": ".",
+                  "file": 1,
+                  "location": 2,
+                  "message": 3
+                }
+              ],
+              "background": {
+                "activeOnStart": true,
+                "beginsPattern": ".",
+                "endsPattern": "QEMU RTOSdemo started",
+              }
+            }
+          ]
+        },
+        {
+          "label": "Run sabrelite",
+          "type": "shell",
+          "command": "echo 'QEMU RTOSdemo started'; ~/Projects/qemu/build-full/qemu-system-arm -M sabrelite -smp 4 -m 1G -kernel u-boot -serial none -serial vc -trace memory_region_ops_* -s -S",
+          "dependsOn": ["Build arm-none-eabi"],
           "isBackground": true,
           "problemMatcher": [
             {
