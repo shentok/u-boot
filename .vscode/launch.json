@@ -43,8 +43,8 @@
                     "ignoreFailures": true
                 }
             ],
-            "stopAtEntry": false,
-            "stopAtConnect": false,
+            "stopAtEntry": true,
+            "stopAtConnect": true,
             "preLaunchTask": "Run sabrelite"
         },
         {
