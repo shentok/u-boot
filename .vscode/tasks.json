@@ -19,7 +19,7 @@
         {
           "label": "Build arm-none-eabi",
           "type": "shell",
-          "command": "make CROSS_COMPILE=arm-none-eabi- -j $(nproc) && mkimage -A arm -O linux -T kernel -C none -a 0x40200000 -e 0x40200000 -n \"U-Boot\" -d u-boot-dtb.bin u-boot-dtb.uImage",
+          "command": "make CROSS_COMPILE=arm-none-eabi- -j $(nproc)",
           "problemMatcher": {
             "base": "$gcc",
             "fileLocation": ["relative", "${workspaceFolder}"]
