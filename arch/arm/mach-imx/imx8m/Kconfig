@@ -427,6 +427,22 @@ config TARGET_LIBREM5
 	select SUPPORT_SPL
 	select IMX8M_LPDDR4
 
+config TARGET_QEMU_IMX8M
+	bool "QEMU i.MX8M Boot ROM"
+	select IMX8MP
+	select SUPPORT_SPL
+	select IMX8M_LPDDR4
+	select FSL_CAAM
+	select ARCH_MISC_INIT
+	select SPL_CRYPTO if SPL
+	select CMD_REMOTEPROC
+	select REMOTEPROC_IMX
+	select REGMAP
+	select SYSCON
+	imply OF_UPSTREAM
+	imply BOOTSTD_FULL
+	imply BOOTSTD_BOOTCOMMAND
+
 endchoice
 
 source "board/advantech/imx8mp_rsb3720a1/Kconfig"
@@ -440,6 +456,7 @@ source "board/data_modul/imx8mm_edm_sbc/Kconfig"
 source "board/data_modul/imx8mp_edm_sbc/Kconfig"
 source "board/dhelectronics/dh_imx8mp/Kconfig"
 source "board/emcraft/imx8mp_navqp/Kconfig"
+source "board/emulation/qemu-imx8m/Kconfig"
 source "board/engicam/imx8mm/Kconfig"
 source "board/engicam/imx8mp/Kconfig"
 source "board/nxp/imx8mq_evk/Kconfig"
