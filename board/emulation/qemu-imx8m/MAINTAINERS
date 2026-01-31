@@ -1,7 +1,6 @@
-i.MX8MP EVK BOARD
-M:	Fabio Estevam <festevam@gmail.com>
-M:	Peng Fan <peng.fan@nxp.com>
+QEMU i.MX8MP EVK BOARD
+M:	Bernhard Beschow <shentey@gmail.com>
 S:	Maintained
-F:	board/nxp/imx8mp_evk/
-F:	include/configs/imx8mp_evk.h
-F:	configs/imx8mp_evk_defconfig
+F:	board/emulation/qemu-imx8m/
+F:	include/configs/qemu-imx8m.h
+F:	configs/qemu_arm64_imx8m_defconfig
