@@ -11,19 +11,16 @@
  *	Aneesh V <aneesh@ti.com>
  */
 
-MEMORY { .sram : ORIGIN = IMAGE_TEXT_BASE,
+MEMORY { .rom : ORIGIN = IMAGE_TEXT_BASE,
 		LENGTH = IMAGE_MAX_SIZE }
-#ifdef CONFIG_SPL_SEPARATE_BSS
-MEMORY { .sdram : ORIGIN = CONFIG_SPL_BSS_START_ADDR,
-		LENGTH = CONFIG_SPL_BSS_MAX_SIZE }
-#endif
+MEMORY { .sram : ORIGIN = 0x900000,
+        LENGTH = 0x18000 }
 
 OUTPUT_FORMAT("elf64-littleaarch64", "elf64-littleaarch64", "elf64-littleaarch64")
 OUTPUT_ARCH(aarch64)
 ENTRY(_start)
 SECTIONS
 {
-	__image_copy_start = ADDR(.text);
 	.text : {
 		. = ALIGN(8);
 		CPUDIR/start.o (.text*)
@@ -34,60 +31,48 @@ SECTIONS
 		__myptrs_end = .;
 
 		*(.text*)
-	} >.sram
+	} >.rom
 
 	.rodata : {
 		. = ALIGN(8);
 		*(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*)))
-	} >.sram
+	} >.rom
 
-	.data : {
-		. = ALIGN(8);
+    . = ORIGIN(.sram);
+
+    __image_copy_start = ADDR(.data);
+    .data ALIGN(8) : AT(ALIGN(LOADADDR(.rodata) + SIZEOF(.rodata), 8)) {
 		*(.__data_start)
 		*(.data*)
-	} >.sram
+    } >.sram
 
-#ifdef CONFIG_SPL_RECOVER_DATA_SECTION
-	.data_save : {
-		*(.__data_save_start)
-		. = SIZEOF(.data);
-		*(.__data_save_end)
-	} >.sram
-#endif
-
-	.binman_sym_table : {
-		. = ALIGN(8);
+    .binman_sym_table ALIGN(8) : AT(ALIGN(LOADADDR(.data) + SIZEOF(.data), 8)) {
 		__binman_sym_start = .;
 		KEEP(*(SORT(.binman_sym*)));
 		__binman_sym_end = .;
 		. = ALIGN(8);
-	} > .sram
+    } > .sram
 
-	__u_boot_list : {
-		. = ALIGN(8);
+    __u_boot_list ALIGN(8) : AT(ALIGN(LOADADDR(.binman_sym_table) + SIZEOF(.binman_sym_table), 8)) {
 		KEEP(*(SORT(__u_boot_list*)));
 		. = ALIGN(8);
-	} >.sram
+    } >.sram
+
+.got ALIGN(8) : AT(ALIGN(LOADADDR(__u_boot_list) + SIZEOF(__u_boot_list), 8)) {
+    *(.got)
+    *(.got.*)
+} > .sram
 
 	__image_copy_end = .;
 	_end = .;
-	_image_binary_end = .;
+    _image_binary_end = LOADADDR(.got) + SIZEOF(.got);
 
-#ifdef CONFIG_SPL_SEPARATE_BSS
-	.bss : {
-		__bss_start = .;
-		*(.bss*)
-		. = ALIGN(8);
-		__bss_end = .;
-	} >.sdram
-#else
-	.bss _image_binary_end (OVERLAY) : {
+    .bss : {
 		__bss_start = .;
 		*(.bss*)
 		 . = ALIGN(8);
 		__bss_end = .;
 	} >.sram
-#endif
 	__bss_size = __bss_end - __bss_start;
 
 	/DISCARD/ : { *(.rela*) }
