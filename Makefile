@@ -546,7 +546,7 @@ KBUILD_CFLAGS   := -Wall -Werror=strict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE \
 		   -Werror=implicit-function-declaration -Werror=implicit-int \
 		   -Wno-format-security -std=gnu11 #-Wundef Enable it and fix warnings
-UBOOT_CFLAGS	:= -ffreestanding -fno-builtin
+UBOOT_CFLAGS	:= -ffreestanding -fno-builtin -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls
 KBUILD_CFLAGS	+= $(UBOOT_CFLAGS)
 
 KBUILD_CPPFLAGS := -D__KERNEL__ -D__UBOOT__
