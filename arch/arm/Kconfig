@@ -914,8 +914,10 @@ config ARCH_IMX8M
 	select SYS_FSL_SEC_COMPAT_4
 	select SYS_FSL_SEC_LE
 	select SYS_I2C_MXC
+	select GPIO
 	select DM
 	select DM_EVENT if CLK
+	select DM_GPIO
 	select SUPPORT_SPL
 	imply CMD_DM
 
