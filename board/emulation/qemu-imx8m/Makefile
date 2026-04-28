@@ -5,6 +5,7 @@
 #
 
 obj-y += imx8mp_evk.o
+obj-y += imx8mp_romapi.o
 obj-y += ../../nxp/common/
 
 ifdef CONFIG_XPL_BUILD
