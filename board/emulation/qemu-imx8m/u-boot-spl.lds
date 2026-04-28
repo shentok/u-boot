@@ -27,6 +27,12 @@ SECTIONS
 	.text : {
 		. = ALIGN(8);
 		CPUDIR/start.o (.text*)
+
+		. = ORIGIN(.sram) + 0x980;
+		__myptrs_start = .;
+		KEEP(*(.myptrs));
+		__myptrs_end = .;
+
 		*(.text*)
 	} >.sram
 

@@ -9,5 +9,6 @@ obj-y += ../../nxp/common/
 
 ifdef CONFIG_XPL_BUILD
 obj-y += spl.o
+obj-y += imx8mp_romapi.o
 obj-$(CONFIG_IMX8M_LPDDR4) += lpddr4_timing.o
 endif
