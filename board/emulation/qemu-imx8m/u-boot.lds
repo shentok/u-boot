@@ -25,7 +25,12 @@ SECTIONS
 	.text :
 	{
 		CPUDIR/start.o (.text*)
-	}
+
+        . = 0x980;
+        __myptrs_start = .;
+        KEEP(*(.myptrs));
+        __myptrs_end = .;
+    }
 
 	/* This needs to come before *(.text*) */
 	.efi_runtime : {
