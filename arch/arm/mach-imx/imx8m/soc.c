@@ -701,7 +701,7 @@ int arch_cpu_init(void)
 }
 
 #if IS_ENABLED(CONFIG_IMX8MN) || IS_ENABLED(CONFIG_IMX8MP)
-struct rom_api *g_rom_api = (struct rom_api *)0x980;
+struct rom_api *g_rom_api = (struct rom_api *)(0x980 + 0x920000);
 #endif
 
 #if IS_ENABLED(CONFIG_IMX8M)
