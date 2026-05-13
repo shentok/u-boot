@@ -4,7 +4,6 @@
  *
  */
 
-#include "asm-generic/sections.h"
 #include <hang.h>
 #include <init.h>
 #include <log.h>
@@ -100,13 +99,6 @@ int board_fit_config_name_match(const char *name)
 void board_init_f(ulong dummy)
 {
 	int ret;
-
-    char *dst = __image_copy_start;
-    char *src = _image_binary_end -(__image_copy_end - __image_copy_start);
-    char *end = __image_copy_end;
-
-    while (dst < end)
-        *dst++ = *src++;
 
 	arch_cpu_init();
 
