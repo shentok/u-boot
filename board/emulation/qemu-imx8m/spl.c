@@ -110,8 +110,7 @@ void board_init_f(ulong dummy)
 
 	preloader_console_init();
 
-	enable_tzc380();
+    board_early_init_f();
 
-	/* DDR initialization */
-	spl_dram_init();
+	enable_tzc380();
 }
