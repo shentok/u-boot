@@ -1,5 +1,7 @@
 #include <asm/arch/sys_proto.h>
 
+static u32 page_sz;
+
 static u32 download_image(u8 *dest, u32 offset, u32 size, u32 xor)
 {
     return 0;
@@ -16,7 +18,7 @@ static u32 query_boot_infor(u32 info_type, u32 *info, u32 xor)
         *info = (BT_DEV_TYPE_MMC << 16) | (2 << 8);
         return ROM_API_OKAY;
     case QUERY_PAGE_SZ:
-        *info = 0x200;
+        *info = page_sz;
         return ROM_API_OKAY;
     case QUERY_IVT_OFF:
         *info = 0;
@@ -41,3 +43,9 @@ struct rom_api func_ptrs __section(".myptrs") __used = {
     .download_image = download_image,
     .query_boot_infor = query_boot_infor,
 };
+
+int board_early_init_f(void)
+{
+    page_sz = 0x200;
+    return 0;
+}
