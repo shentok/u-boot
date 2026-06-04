@@ -102,6 +102,12 @@ static int power_init_board(void)
 	return 0;
 }
 
+void board_boot_order(u32 *spl_boot_list)
+{
+    /* TODO: Evaulate SRC/OCOTP_CTRL instead, and try both MMC and SD for each USDHC */
+    spl_boot_list[0] = spl_boot_device();
+}
+
 void board_init_f(ulong dummy)
 {
 	struct udevice *dev;
