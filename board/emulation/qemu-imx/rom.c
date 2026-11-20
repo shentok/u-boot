@@ -20,6 +20,8 @@
 #include <linux/string.h>
 #include "qemu_imx_rom.h"
 
+DECLARE_GLOBAL_DATA_PTR;
+
 #if IS_ENABLED(CONFIG_XPL_BUILD)
 
 #define IVT_TAG				0xd1
@@ -46,6 +48,7 @@ struct imx_boot_data {
 };
 
 struct rom_boot_dev rom_boot_dev;
+gd_t *rom_gd;
 
 void board_boot_order(u32 *spl_boot_list)
 {
@@ -123,6 +126,7 @@ void board_init_f(ulong dummy)
 	/* Never returning to crt0, so clear .bss here */
 	memset(__bss_start, 0, __bss_end - __bss_start);
 
+	rom_gd = (gd_t *)gd;
 	rom_detect_boot_device();
 
 	timer_init();

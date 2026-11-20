@@ -422,6 +422,16 @@ config TARGET_QEMU_IMX8MM_ROM
 	  QEMU's imx8mm-evk machine (loaded with -bios). It loads the i.MX
 	  boot image (flash.bin) from SD/eMMC into TCM and starts it.
 
+config TARGET_QEMU_IMX8MP_ROM
+	bool "QEMU i.MX8MP virtual boot ROM"
+	select IMX8MP
+	select QEMU_IMX_ROM
+	help
+	  Builds a U-Boot SPL which acts as the boot ROM of an i.MX8MP in
+	  QEMU's imx8mp-evk machine (loaded with -bios). It loads the i.MX
+	  boot image (flash.bin) from SD/eMMC into OCRAM, starts it, and
+	  provides the ROM API to load further images.
+
 endchoice
 
 source "board/advantech/imx8mp_rsb3720a1/Kconfig"

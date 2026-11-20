@@ -37,9 +37,13 @@ SECTIONS
 		CPUDIR/start.o (.text*)
 
 		/*
-		 * Pointer to the ROM's software info structure at a fixed
-		 * location, see get_boot_device() and mmc_get_env_dev()
+		 * Interfaces at fixed locations used by SPL and U-Boot proper,
+		 * see g_rom_api and get_boot_device():
+		 * - i.MX8MN/8MP: ROM API table
+		 * - all: pointer to the ROM's software info structure
 		 */
+		. = ORIGIN(.sram) + 0x980;
+		KEEP(*(.rom_api));
 		. = ORIGIN(.sram) + 0x9e8;
 		KEEP(*(.rom_sw_info_ptr));
 

@@ -6,6 +6,7 @@
 #ifndef __BOARD_QEMU_IMX_ROM_H
 #define __BOARD_QEMU_IMX_ROM_H
 
+#include <asm/global_data.h>
 #include <linux/types.h>
 
 /**
@@ -37,5 +38,11 @@ void rom_detect_boot_device(void);
  * Return: device number, or -ENODEV if the boot device is not supported
  */
 int rom_mmc_devnum(void);
+
+/*
+ * Global data pointer of the ROM. Services which the ROM provides to later boot
+ * stages switch to it, since they are executed in the context of their caller.
+ */
+extern gd_t *rom_gd;
 
 #endif

@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Device tree of the QEMU i.MX8MP virtual boot ROM
+ */
+
+#include "imx8mp-evk.dts"
+#include "qemu-imx8m-rom.dtsi"
+
+/ {
+	model = "QEMU i.MX8MP virtual boot ROM";
+
+	/* Image for QEMU's -bios option, sized like the boot ROM region */
+	binman {
+		filename = "imx8mp-boot.rom";
+		size = <0x3f000>;
+		pad-byte = <0x00>;
+
+		u-boot-spl {
+		};
+	};
+};
+
+/* The console UART is located on this bus */
+&aips3 {
+	spba-bus@30800000 {
+		bootph-pre-ram;
+	};
+};
