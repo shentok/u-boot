@@ -20,13 +20,13 @@ static struct id_eeprom eeprom;
 
 void show_eeprom(void)
 {
-	char safe_string[33];
+	char safe_string[sizeof(eeprom.id) + 1];
 	int i;
 	u8 *p;
 
 	puts("Module EEPROM:\n");
 	/* ID */
-	for (i = 0; i <= sizeof(eeprom.id) && 0xff != eeprom.id[i]; ++i)
+	for (i = 0; i < sizeof(eeprom.id) && 0xff != eeprom.id[i]; ++i)
 		safe_string[i] = eeprom.id[i];
 	safe_string[i] = '\0';
 
@@ -38,7 +38,7 @@ void show_eeprom(void)
 	}
 
 	/* Serial number */
-	for (i = 0; (sizeof(eeprom.serial) >= i) &&
+	for (i = 0; (i < sizeof(eeprom.serial)) &&
 		    (eeprom.serial[i] >= 0x30) &&
 		    (eeprom.serial[i] <= 0x39); ++i)
 		safe_string[i] = eeprom.serial[i];
