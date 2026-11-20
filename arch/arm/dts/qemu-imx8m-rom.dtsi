@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Common device tree bits of the QEMU i.MX8M virtual boot ROMs. The ROMs only
+ * need the console UART and the USDHC controllers they can boot from.
+ */
+
+&soc {
+	bootph-pre-ram;
+};
+
+&aips1 {
+	bootph-pre-ram;
+};
+
+&aips2 {
+	bootph-pre-ram;
+};
+
+&aips3 {
+	bootph-pre-ram;
+};
+
+&clk {
+	bootph-pre-ram;
+	/delete-property/ assigned-clocks;
+	/delete-property/ assigned-clock-parents;
+	/delete-property/ assigned-clock-rates;
+};
+
+&osc_24m {
+	bootph-pre-ram;
+};
+
+&osc_32k {
+	bootph-pre-ram;
+};
+
+&iomuxc {
+	bootph-pre-ram;
+};
+
+&pinctrl_uart2 {
+	bootph-pre-ram;
+};
+
+&uart2 {
+	bootph-pre-ram;
+};
+
+/* The ROM doesn't switch regulators or use card detect GPIOs */
+&usdhc2 {
+	bootph-pre-ram;
+	/delete-property/ vmmc-supply;
+	/delete-property/ cd-gpios;
+	broken-cd;
+};
+
+&pinctrl_usdhc2 {
+	bootph-pre-ram;
+};
+
+&usdhc3 {
+	bootph-pre-ram;
+};
+
+&pinctrl_usdhc3 {
+	bootph-pre-ram;
+};

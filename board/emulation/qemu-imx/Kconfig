@@ -1,0 +1,23 @@
+config QEMU_IMX_ROM
+	bool
+	select BINMAN
+	select SUPPORT_SPL
+	select ENABLE_ARM_SOC_BOOT0_HOOK
+	help
+	  Common support for the virtual i.MX boot ROMs for QEMU.
+
+if QEMU_IMX_ROM
+
+config SYS_BOARD
+	default "qemu-imx"
+
+config SYS_VENDOR
+	default "emulation"
+
+config SYS_CONFIG_NAME
+	default "qemu-imx8m-rom" if ARCH_IMX8M
+
+config SPL_LDSCRIPT
+	default "board/emulation/qemu-imx/u-boot-spl-imx8m-rom.lds" if ARCH_IMX8M
+
+endif

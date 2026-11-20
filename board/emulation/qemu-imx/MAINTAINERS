@@ -1,0 +1,9 @@
+QEMU I.MX VIRTUAL BOOT ROMS
+M:	Bernhard Beschow <shentey@gmail.com>
+S:	Maintained
+F:	arch/arm/dts/qemu-imx8m-rom.dtsi
+F:	arch/arm/dts/qemu-imx8mm-rom.dts
+F:	arch/arm/include/asm/arch-imx8m/boot0.h
+F:	board/emulation/qemu-imx/
+F:	configs/qemu_imx8mm_rom_defconfig
+F:	include/configs/qemu-imx8m-rom.h

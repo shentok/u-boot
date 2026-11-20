@@ -413,6 +413,15 @@ config TARGET_LIBREM5_DEVKIT
 	select SUPPORT_SPL
 	select IMX8M_LPDDR4
 
+config TARGET_QEMU_IMX8MM_ROM
+	bool "QEMU i.MX8MM virtual boot ROM"
+	select IMX8MM
+	select QEMU_IMX_ROM
+	help
+	  Builds a U-Boot SPL which acts as the boot ROM of an i.MX8MM in
+	  QEMU's imx8mm-evk machine (loaded with -bios). It loads the i.MX
+	  boot image (flash.bin) from SD/eMMC into TCM and starts it.
+
 endchoice
 
 source "board/advantech/imx8mp_rsb3720a1/Kconfig"
