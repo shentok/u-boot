@@ -11,6 +11,7 @@ Emulation
    network
    video
    qemu-arm
+   qemu-imx-rom
    qemu-mips
    qemu-ppce500
    qemu-riscv

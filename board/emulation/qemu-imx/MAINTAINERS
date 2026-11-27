@@ -20,6 +20,7 @@ F:	configs/qemu_imx6ul_rom_defconfig
 F:	configs/qemu_imx7d_rom_defconfig
 F:	configs/qemu_imx8mm_rom_defconfig
 F:	configs/qemu_imx8mp_rom_defconfig
+F:	doc/board/emulation/qemu-imx-rom.rst
 F:	include/configs/qemu-imx53-rom.h
 F:	include/configs/qemu-imx6-rom.h
 F:	include/configs/qemu-imx7-rom.h
