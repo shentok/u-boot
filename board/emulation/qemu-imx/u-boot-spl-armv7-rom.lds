@@ -34,10 +34,16 @@ SECTIONS
 		/*
 		 * Interfaces at fixed locations used by later boot stages:
 		 * - i.MX53: silicon revision, see get_cpu_rev()
+		 * - i.MX7: pointer to the ROM's software info structure, see
+		 *   get_boot_device()
 		 */
 #ifdef CONFIG_MX53
 		. = 0x48;
 		KEEP(*(.rom_si_rev))
+#endif
+#ifdef CONFIG_MX7
+		. = 0x1e8;
+		KEEP(*(.rom_sw_info_ptr))
 #endif
 
 		CPUDIR/start.o (.text*)

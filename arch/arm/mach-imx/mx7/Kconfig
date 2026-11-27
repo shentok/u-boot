@@ -65,6 +65,20 @@ config TARGET_PICO_IMX7D
 	select SUPPORT_SPL
 	imply CMD_DM
 
+config TARGET_QEMU_IMX7D_ROM
+	bool "QEMU i.MX7D virtual boot ROM"
+	select DM
+	select DM_MMC
+	select DM_SERIAL
+	select MMC
+	select MX7D
+	select QEMU_IMX_ROM
+	help
+	  Builds a U-Boot SPL which acts as the boot ROM of an i.MX7D in
+	  QEMU's mcimx7d-sabre machine (loaded with -bios). It executes the
+	  DCD of the boot image (u-boot.imx) on SD/eMMC, loads the image
+	  into DRAM and starts it.
+
 config TARGET_SMEGW01
 	bool "smegw01"
 	select BOARD_LATE_INIT

@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Device tree of the QEMU i.MX7D virtual boot ROM. The ROM only needs the
+ * console UART and the USDHC controllers it can boot from, i.e. the ones of
+ * the SD card slot and the eMMC of the i.MX7D SABRE board.
+ */
+
+/dts-v1/;
+#include "imx7d.dtsi"
+
+/ {
+	model = "QEMU i.MX7D virtual boot ROM";
+	compatible = "fsl,imx7d";
+
+	chosen {
+		stdout-path = &uart1;
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x80000000 0x40000000>;
+	};
+
+	/* Image for QEMU's -bios option, sized like the boot ROM region */
+	binman {
+		filename = "imx7d-boot.rom";
+		size = <0x18000>;
+		pad-byte = <0x00>;
+
+		u-boot-spl {
+		};
+	};
+};
+
+&soc {
+	bootph-pre-ram;
+};
+
+&aips2 {
+	bootph-pre-ram;
+};
+
+&aips3 {
+	bootph-pre-ram;
+
+	spba-bus@30800000 {
+		bootph-pre-ram;
+	};
+};
+
+&uart1 {
+	bootph-pre-ram;
+	status = "okay";
+};
+
+/* The ROM doesn't use card detect or write protect GPIOs */
+&usdhc1 {
+	bootph-pre-ram;
+	broken-cd;
+	status = "okay";
+};
+
+&usdhc3 {
+	bootph-pre-ram;
+	broken-cd;
+	status = "okay";
+};
