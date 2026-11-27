@@ -569,6 +569,33 @@ config TARGET_PCL063_ULL
 	select MMC
 	select SUPPORT_SPL
 
+config TARGET_QEMU_IMX6Q_ROM
+	bool "QEMU i.MX6Q virtual boot ROM"
+	depends on MX6Q
+	select DM
+	select DM_MMC
+	select DM_SERIAL
+	select MMC
+	select QEMU_IMX_ROM
+	help
+	  Builds a U-Boot SPL which acts as the boot ROM of an i.MX6Q in
+	  QEMU's sabrelite machine (loaded with -bios). It executes the DCD
+	  of the boot image (u-boot.imx) on SD/eMMC, loads the image into
+	  DRAM and starts it.
+
+config TARGET_QEMU_IMX6UL_ROM
+	bool "QEMU i.MX6UL virtual boot ROM"
+	depends on MX6UL
+	select DM
+	select DM_MMC
+	select DM_SERIAL
+	select MMC
+	select QEMU_IMX_ROM
+	help
+	  Builds a U-Boot SPL which acts as the boot ROM of an i.MX6UL in
+	  QEMU's mcimx6ul-evk machine (loaded with -bios). It loads the boot
+	  image (SPL) from SD/eMMC into OCRAM and starts it.
+
 config TARGET_SOMLABS_VISIONSOM_6ULL
 	bool "visionsom-6ull"
 	depends on MX6ULL

@@ -777,6 +777,7 @@ dtb-y += \
 	imx6qp-sabreauto.dtb \
 	imx6qp-sabresd.dtb \
 	imx6qp-wandboard-revd1.dtb \
+	qemu-imx6q-rom.dtb
 
 endif
 
@@ -800,7 +801,8 @@ dtb-$(CONFIG_MX6UL) += \
 	imx6ul-liteboard.dtb \
 	imx6ul-phytec-segin-ff-rdk-nand.dtb \
 	imx6ul-pico-hobbit.dtb \
-	imx6ul-pico-pi.dtb
+	imx6ul-pico-pi.dtb \
+	qemu-imx6ul-rom.dtb
 
 dtb-$(CONFIG_MX6ULL) += \
 	imx6ull-14x14-evk.dtb \
