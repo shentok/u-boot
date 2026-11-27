@@ -1,0 +1,197 @@
+# Builds the virtual i.MX boot ROMs for QEMU, see
+# doc/board/emulation/qemu-imx-rom.rst, as well as board images which they
+# boot. Tags matching qemu-imx-rom-v* publish both as a GitHub release, e.g.
+# for QEMU's functional tests.
+name: QEMU i.MX boot ROMs
+
+on:
+  push:
+    branches:
+      - 'qemu-imx-rom*'
+    tags:
+      - 'qemu-imx-rom-v*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  TFA_TAG: lts-v2.14.15
+
+jobs:
+  build:
+    name: ${{ matrix.config }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - config: qemu_imx53_rom
+            cross: arm-none-eabi-
+            rom: imx53-boot.rom
+          - config: qemu_imx6q_rom
+            cross: arm-none-eabi-
+            rom: imx6q-boot.rom
+          - config: qemu_imx6ul_rom
+            cross: arm-none-eabi-
+            rom: imx6ul-boot.rom
+          - config: qemu_imx7d_rom
+            cross: arm-none-eabi-
+            rom: imx7d-boot.rom
+          - config: qemu_imx8mm_rom
+            cross: aarch64-linux-gnu-
+            rom: imx8mm-boot.rom
+          - config: qemu_imx8mp_rom
+            cross: aarch64-linux-gnu-
+            rom: imx8mp-boot.rom
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bc bison flex libgnutls28-dev libssl-dev python3-dev \
+            python3-pyelftools python3-setuptools swig uuid-dev \
+            gcc-arm-none-eabi gcc-aarch64-linux-gnu
+
+      - name: Build
+        env:
+          CROSS_COMPILE: ${{ matrix.cross }}
+        run: |
+          # Stamp the build with the commit time rather than the build time
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          make O=build ${{ matrix.config }}_defconfig
+          make O=build -j$(nproc)
+          test -s build/${{ matrix.rom }}
+          ${CROSS_COMPILE}size build/spl/u-boot-spl
+
+      - name: Upload ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.config }}
+          path: |
+            build/${{ matrix.rom }}
+            build/spl/u-boot-spl
+            build/.config
+          if-no-files-found: error
+
+  # Board images booted by the ROMs. The i.MX6UL isn't covered since a
+  # suitable SD card image exists already.
+  boards:
+    name: ${{ matrix.board }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - board: mx6qsabrelite
+            cross: arm-none-eabi-
+            image: u-boot-dtb.imx
+          - board: mx7dsabresd
+            cross: arm-none-eabi-
+            image: u-boot-dtb.imx
+          - board: imx8mm_evk
+            cross: aarch64-linux-gnu-
+            image: flash.bin
+            tfa: imx8mm
+          - board: imx8mp_evk
+            cross: aarch64-linux-gnu-
+            image: flash.bin
+            tfa: imx8mp
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bc bison flex libgnutls28-dev libssl-dev python3-dev \
+            python3-pyelftools python3-setuptools swig uuid-dev \
+            gcc-arm-none-eabi gcc-aarch64-linux-gnu
+
+      - name: Build TF-A and provide DDR firmware placeholders
+        if: matrix.tfa
+        run: .github/scripts/imx8m-blobs.sh ${{ matrix.tfa }} build
+
+      - name: Build
+        env:
+          CROSS_COMPILE: ${{ matrix.cross }}
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          make O=build ${{ matrix.board }}_defconfig
+          make O=build -j$(nproc)
+          mkdir out
+          cp build/${{ matrix.image }} \
+            out/${{ matrix.board }}-${{ matrix.image }}
+
+      - name: Upload board image
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.board }}
+          path: out/${{ matrix.board }}-${{ matrix.image }}
+          if-no-files-found: error
+
+  # The boards above with CONFIG_IMX_HAB and images signed with a throwaway
+  # test PKI, whose private keys never leave this job. The SRK hash fuse
+  # values are published along with the images.
+  hab:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bc bison flex libgnutls28-dev libssl-dev python3-dev \
+            python3-pyelftools python3-setuptools swig uuid-dev \
+            gcc-arm-none-eabi gcc-aarch64-linux-gnu imx-code-signing-tool
+
+      - name: Build and sign
+        run: |
+          .github/scripts/hab-pki.sh "$RUNNER_TEMP/pki"
+          .github/scripts/hab-images.sh "$RUNNER_TEMP/pki" out
+
+      - name: Upload signed images
+        uses: actions/upload-artifact@v4
+        with:
+          name: hab
+          path: out/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/qemu-imx-rom-v')
+    needs: [build, boards, hab]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir release
+          cp artifacts/*/*-boot.rom artifacts/*/*-u-boot-dtb.imx \
+            artifacts/*/*-flash.bin artifacts/hab/* release/
+          (cd release && sha256sum * > SHA256SUMS)
+          cat > notes.md <<EOF
+          Virtual i.MX boot ROMs for QEMU and board images which they boot,
+          built from ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/tree/${GITHUB_SHA}.
+
+          The i.MX 8M images contain TF-A ${TFA_TAG} and empty placeholders
+          for the DDR PHY training firmware, so they only work in QEMU.
+
+          The *-hab-* images are built with CONFIG_IMX_HAB and signed with a
+          throwaway test PKI. They boot on closed devices whose SRK_HASH fuses
+          hold the values of hab-SRK_1_2_3_4_fuse.bin.
+          EOF
+          gh release create "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" \
+            --title "$GITHUB_REF_NAME" --notes-file notes.md release/*
