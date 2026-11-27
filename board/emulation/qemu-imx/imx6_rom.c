@@ -3,7 +3,7 @@
  * i.MX6 specific part of the virtual boot ROMs for QEMU
  *
  * The i.MX6 ROMs have no ROM API, and later boot stages determine the boot
- * device from SRC_SBMR1 themselves.
+ * device from SRC_SBMR1 themselves. They use the ROM's HAB services, though.
  */
 
 #include <errno.h>
@@ -22,6 +22,12 @@
 #define BOOT_MODE_INTERNAL		2
 #define BOOT_DEV_SD			2
 #define BOOT_DEV_MMC			3
+
+/* Shadow registers of the fuses, eight words per bank */
+#define OCOTP_SHADOW(bank, word)	\
+	((ulong)OCOTP_BASE_ADDR + 0x400 + ((bank) * 8 + (word)) * 0x10)
+#define OCOTP_SEC_CONFIG		OCOTP_SHADOW(0, 6)
+#define SEC_CONFIG_CLOSED		BIT(1)
 
 /*
  * Default: SD card slot of the board, i.e. USDHC3 on the SABRE Lite and
@@ -59,6 +65,11 @@ void rom_detect_boot_device(void)
 		rom_boot_dev.port = FIELD_GET(SBMR1_USDHC_PORT, sbmr1);
 		break;
 	}
+}
+
+bool rom_hab_closed(void)
+{
+	return readl(OCOTP_SEC_CONFIG) & SEC_CONFIG_CLOSED;
 }
 
 int rom_mmc_devnum(void)

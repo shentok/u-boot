@@ -34,6 +34,7 @@ SECTIONS
 		/*
 		 * Interfaces at fixed locations used by later boot stages:
 		 * - i.MX53: silicon revision, see get_cpu_rev()
+		 * - all: HAB ROM Vector Table, see HAB_RVT_BASE
 		 * - i.MX7: pointer to the ROM's software info structure, see
 		 *   get_boot_device()
 		 */
@@ -41,6 +42,14 @@ SECTIONS
 		. = 0x48;
 		KEEP(*(.rom_si_rev))
 #endif
+#ifdef CONFIG_ROM_UNIFIED_SECTIONS
+		. = 0x100;
+#else
+		. = 0x94;
+#endif
+		__rom_hab_rvt_start = .;
+		KEEP(*(.rom_hab_rvt))
+		__rom_hab_rvt_end = .;
 #ifdef CONFIG_MX7
 		. = 0x1e8;
 		KEEP(*(.rom_sw_info_ptr))
@@ -112,6 +121,7 @@ SECTIONS
 }
 
 ASSERT(__vectors_end <= 0x48, "vectors overlap the ROM interfaces");
+ASSERT(__rom_hab_rvt_end > __rom_hab_rvt_start, "HAB ROM Vector Table missing");
 
 ASSERT(_image_binary_end % 8 == 0, \
        "_image_binary_end must be 8-byte aligned for device tree");

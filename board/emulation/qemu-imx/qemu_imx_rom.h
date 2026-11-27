@@ -42,6 +42,24 @@ void rom_detect_boot_device(void);
  */
 int rom_mmc_devnum(void);
 
+/* End of the boot ROM, which cannot be the target of images */
+#if IS_ENABLED(CONFIG_ARCH_IMX8M)
+#define ROM_END			0x40000
+#elif IS_ENABLED(CONFIG_MX53)
+#define ROM_END			0x10000
+#else
+#define ROM_END			0x18000
+#endif
+
+/**
+ * rom_hab_closed() - Whether the device is closed for High Assurance Boot
+ *
+ * SoC specific, determined by the SEC_CONFIG fuse.
+ *
+ * Return: true if the device is closed, false if it is open
+ */
+bool rom_hab_closed(void);
+
 /*
  * Global data pointer of the ROM. Services which the ROM provides to later boot
  * stages switch to it, since they are executed in the context of their caller.

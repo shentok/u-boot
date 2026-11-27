@@ -17,6 +17,12 @@
 #define SBMR2_BOOT_MODE			GENMASK(25, 24)
 #define BOOT_MODE_INTERNAL		2
 
+/* Shadow registers of the fuses */
+#define OCOTP_SHADOW(bank, word)	\
+	((ulong)OCOTP_BASE_ADDR + 0x400 + ((bank) * 4 + (word)) * 0x10)
+#define OCOTP_SEC_CONFIG		OCOTP_SHADOW(1, 3)
+#define SEC_CONFIG_CLOSED		BIT(25)
+
 /* Default: microSD slot of the EVKs */
 #define DEFAULT_BOOT_TYPE		BOOT_TYPE_SD
 #define DEFAULT_USDHC_PORT		1	/* USDHC2 */
@@ -58,6 +64,11 @@ void rom_detect_boot_device(void)
 
 	rom_sw_info.boot_dev_type = type;
 	rom_sw_info.boot_dev_instance = port;
+}
+
+bool rom_hab_closed(void)
+{
+	return readl(OCOTP_SEC_CONFIG) & SEC_CONFIG_CLOSED;
 }
 
 int rom_mmc_devnum(void)

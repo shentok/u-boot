@@ -4,7 +4,7 @@
  *
  * The i.MX53 ROM has no ROM API, and later boot stages determine the boot
  * device from SRC_SBMR themselves. They only read the silicon revision from
- * the ROM (see get_cpu_rev()).
+ * the ROM (see get_cpu_rev()) and use its HAB services.
  */
 
 #include <errno.h>
@@ -21,6 +21,12 @@
 #define SBMR_BOOT_MODE			GENMASK(25, 24)
 #define BOOT_MODE_INTERNAL		2
 #define BOOT_DEV_SD			4
+
+/* Fuses as read via the IIM, eight bits per word */
+#define IIM_FUSE(bank, word)		\
+	((ulong)IIM_BASE_ADDR + 0x800 + (bank) * 0x400 + (word) * 4)
+#define IIM_SEC_CONFIG			IIM_FUSE(0, 4)
+#define SEC_CONFIG_CLOSED		BIT(1)
 
 /* Silicon revision 2.1 */
 #define ROM_SI_REV_2_1			0x21
@@ -48,6 +54,11 @@ void rom_detect_boot_device(void)
 
 	rom_boot_dev.port = 0;
 	rom_boot_dev.try_all = true;
+}
+
+bool rom_hab_closed(void)
+{
+	return readl(IIM_SEC_CONFIG) & SEC_CONFIG_CLOSED;
 }
 
 int rom_mmc_devnum(void)

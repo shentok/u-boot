@@ -38,10 +38,13 @@ SECTIONS
 
 		/*
 		 * Interfaces at fixed locations used by SPL and U-Boot proper,
-		 * see g_rom_api and get_boot_device():
+		 * see HAB_RVT_BASE, g_rom_api and get_boot_device():
+		 * - all: HAB ROM Vector Table
 		 * - i.MX8MN/8MP: ROM API table
 		 * - all: pointer to the ROM's software info structure
 		 */
+		. = ORIGIN(.sram) + 0x900;
+		KEEP(*(.rom_hab_rvt));
 		. = ORIGIN(.sram) + 0x980;
 		KEEP(*(.rom_api));
 		. = ORIGIN(.sram) + 0x9e8;
