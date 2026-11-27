@@ -4,19 +4,24 @@
  *
  * This SPL is loaded into the boot ROM region at 0x0 with QEMU's -bios option
  * and executes in place. Like the real ROM it determines the boot device, reads
- * the i.MX boot image from it, copies the boot data to the location given in
- * the IVT and jumps to its entry point.
+ * the i.MX boot image from it, executes the image's DCD, copies the boot data
+ * to the location given in the IVT and jumps to its entry point.
  *
- * Out of scope: DCD, plugins, HAB, serial download, NAND, (Q)SPI.
+ * Out of scope: plugins, HAB, serial download, NAND, (Q)SPI.
  */
 
+#include <blk.h>
 #include <errno.h>
 #include <hang.h>
 #include <init.h>
 #include <log.h>
+#include <mmc.h>
 #include <spl.h>
+#include <asm/cache.h>
 #include <asm/io.h>
 #include <asm/sections.h>
+#include <asm/unaligned.h>
+#include <linux/bitfield.h>
 #include <linux/string.h>
 #include "qemu_imx_rom.h"
 
@@ -27,6 +32,16 @@ DECLARE_GLOBAL_DATA_PTR;
 #define IVT_TAG				0xd1
 #define HAB_VERSION_MASK		0xf0
 #define HAB_VERSION			0x40
+
+#define DCD_TAG				0xd2
+#define DCD_MAX_SIZE			1768
+#define DCD_CMD_WRITE			0xcc
+#define DCD_CMD_CHECK			0xcf
+#define DCD_CMD_NOP			0xc0
+#define DCD_PARAM_WIDTH			GENMASK(2, 0)
+#define DCD_PARAM_MASK			BIT(3)
+#define DCD_PARAM_SET			BIT(4)
+#define DCD_CHECK_MAX_POLLS		1000000
 
 struct imx_ivt {
 	u8 tag;
@@ -52,6 +67,13 @@ gd_t *rom_gd;
 
 void board_boot_order(u32 *spl_boot_list)
 {
+	if (rom_boot_dev.try_all) {
+		spl_boot_list[0] = BOOT_DEVICE_MMC1;
+		spl_boot_list[1] = BOOT_DEVICE_MMC2;
+		spl_boot_list[2] = BOOT_DEVICE_NONE;
+		return;
+	}
+
 	switch (rom_mmc_devnum()) {
 	case 0:
 		spl_boot_list[0] = BOOT_DEVICE_MMC1;
@@ -63,6 +85,150 @@ void board_boot_order(u32 *spl_boot_list)
 		spl_boot_list[0] = BOOT_DEVICE_NONE;
 		break;
 	}
+}
+
+static u32 rom_dcd_read(ulong addr, uint width)
+{
+	switch (width) {
+	case 1:
+		return readb(addr);
+	case 2:
+		return readw(addr);
+	default:
+		return readl(addr);
+	}
+}
+
+static void rom_dcd_write(ulong addr, uint width, u32 val)
+{
+	switch (width) {
+	case 1:
+		writeb(val, addr);
+		break;
+	case 2:
+		writew(val, addr);
+		break;
+	default:
+		writel(val, addr);
+		break;
+	}
+}
+
+static int rom_dcd_write_cmd(const u8 *p, uint len, u8 param)
+{
+	uint width = FIELD_GET(DCD_PARAM_WIDTH, param);
+	const u8 *end = p + len;
+
+	for (p += 4; p + 8 <= end; p += 8) {
+		ulong addr = get_unaligned_be32(p);
+		u32 val = get_unaligned_be32(p + 4);
+
+		if (param & DCD_PARAM_MASK) {
+			u32 reg = rom_dcd_read(addr, width);
+
+			val = param & DCD_PARAM_SET ? reg | val : reg & ~val;
+		}
+
+		rom_dcd_write(addr, width, val);
+	}
+
+	return 0;
+}
+
+static int rom_dcd_check_cmd(const u8 *p, uint len, u8 param)
+{
+	uint width = FIELD_GET(DCD_PARAM_WIDTH, param);
+	ulong addr = get_unaligned_be32(p + 4);
+	u32 mask = get_unaligned_be32(p + 8);
+	u32 polls = len >= 16 ? get_unaligned_be32(p + 12) : DCD_CHECK_MAX_POLLS;
+
+	while (polls--) {
+		u32 reg = rom_dcd_read(addr, width) & mask;
+		bool done;
+
+		if (param & DCD_PARAM_MASK)
+			done = param & DCD_PARAM_SET ? reg != 0 : reg != mask;
+		else
+			done = param & DCD_PARAM_SET ? reg == mask : reg == 0;
+
+		if (done)
+			return 0;
+	}
+
+	log_err("ROM: DCD check of 0x%08lx timed out\n", addr);
+	return -ETIMEDOUT;
+}
+
+/* Executes the Device Configuration Data, e.g. to initialize the DRAM */
+static int rom_run_dcd(const u8 *dcd)
+{
+	uint len = get_unaligned_be16(dcd + 1);
+	const u8 *end = dcd + len;
+	const u8 *p;
+	int ret;
+
+	if (dcd[0] != DCD_TAG || (dcd[3] & HAB_VERSION_MASK) != HAB_VERSION ||
+	    len > DCD_MAX_SIZE) {
+		log_err("ROM: invalid DCD\n");
+		return -EINVAL;
+	}
+
+	for (p = dcd + 4; p + 4 <= end; p += len) {
+		u8 param = p[3];
+
+		len = get_unaligned_be16(p + 1);
+		if (len < 4 || p + len > end) {
+			log_err("ROM: malformed DCD command\n");
+			return -EINVAL;
+		}
+
+		switch (p[0]) {
+		case DCD_CMD_WRITE:
+			ret = rom_dcd_write_cmd(p, len, param);
+			break;
+		case DCD_CMD_CHECK:
+			ret = len >= 12 ? rom_dcd_check_cmd(p, len, param) : -EINVAL;
+			break;
+		case DCD_CMD_NOP:
+			ret = 0;
+			break;
+		default:
+			log_err("ROM: unsupported DCD command 0x%02x\n", p[0]);
+			ret = -EINVAL;
+			break;
+		}
+
+		if (ret)
+			return ret;
+	}
+
+	return 0;
+}
+
+/* Reads the DCD, which follows the IVT, from the boot device and executes it */
+static int rom_load_and_run_dcd(const struct imx_ivt *ivt,
+				const struct spl_boot_device *bootdev)
+{
+	static u8 buf[DCD_MAX_SIZE + 2 * 512] __aligned(ARCH_DMA_MINALIGN);
+	struct blk_desc *desc;
+	struct mmc *mmc;
+	ulong offset;
+
+	if (ivt->dcd < ivt->self)
+		return -EINVAL;
+
+	mmc = find_mmc_device(bootdev->boot_device == BOOT_DEVICE_MMC2 ? 1 : 0);
+	desc = mmc ? mmc_get_blk_desc(mmc) : NULL;
+	if (!desc)
+		return -ENODEV;
+
+	offset = CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR * 512 +
+		 (ivt->dcd - ivt->self);
+	if (blk_dread(desc, offset / 512, sizeof(buf) / 512, buf) !=
+	    sizeof(buf) / 512)
+		return -EIO;
+
+	return rom_run_dcd(buf + offset % 512);
 }
 
 /*
@@ -77,6 +243,7 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 	const struct imx_ivt *ivt = image_header;
 	const struct imx_boot_data *bd;
 	u32 bd_offset;
+	int ret;
 
 	if (ivt->tag != IVT_TAG ||
 	    (ivt->version & HAB_VERSION_MASK) != HAB_VERSION) {
@@ -103,8 +270,13 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 		return -EINVAL;
 	}
 
-	if (ivt->dcd)
-		log_warning("ROM: ignoring DCD at 0x%08x\n", ivt->dcd);
+	if (ivt->dcd) {
+		ret = rom_load_and_run_dcd(ivt, bootdev);
+		if (ret) {
+			log_err("ROM: DCD failed: %d\n", ret);
+			return ret;
+		}
+	}
 
 	spl_image->name = "loader";
 	spl_image->os = IH_OS_U_BOOT;

@@ -55,6 +55,20 @@ config TARGET_MX53LOCO
 	select BOARD_LATE_INIT
 	select MX53
 
+config TARGET_QEMU_IMX53_ROM
+	bool "QEMU i.MX53 virtual boot ROM"
+	select DM
+	select DM_MMC
+	select DM_SERIAL
+	select MMC
+	select MX53
+	select QEMU_IMX_ROM
+	help
+	  Builds a U-Boot SPL which acts as the boot ROM of an i.MX53 in
+	  QEMU's i.MX53 machines (loaded with -bios). It executes the DCD of
+	  the boot image (u-boot.imx) on SD/eMMC, loads the image into DRAM
+	  and starts it.
+
 config TARGET_MX53PPD
 	bool "Support mx53ppd"
 	select MX53

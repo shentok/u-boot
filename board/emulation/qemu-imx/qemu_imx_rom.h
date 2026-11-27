@@ -14,10 +14,13 @@
  *
  * @type: BOOT_TYPE_SD or BOOT_TYPE_MMC
  * @port: (u)SDHC instance, starting at 0 for (u)SDHC1
+ * @try_all: The boot device is a default rather than configured, so try all
+ *	     (u)SDHC instances enabled in the ROM's device tree in turn
  */
 struct rom_boot_dev {
 	u8 type;
 	u8 port;
+	bool try_all;
 };
 
 extern struct rom_boot_dev rom_boot_dev;

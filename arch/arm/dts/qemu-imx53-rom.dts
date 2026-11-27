@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Device tree of the QEMU i.MX53 virtual boot ROM. The ROM only needs the
+ * console UART and the eSDHC controllers it can boot from.
+ */
+
+/dts-v1/;
+#include "imx53.dtsi"
+
+/ {
+	model = "QEMU i.MX53 virtual boot ROM";
+	compatible = "fsl,imx53";
+
+	chosen {
+		stdout-path = &uart1;
+	};
+
+	memory@70000000 {
+		device_type = "memory";
+		reg = <0x70000000 0x40000000>;
+	};
+
+	/* Image for QEMU's -bios option, sized like the boot ROM region */
+	binman {
+		filename = "imx53-boot.rom";
+		size = <0x10000>;
+		pad-byte = <0x00>;
+
+		u-boot-spl {
+		};
+	};
+};
+
+&soc {
+	bootph-pre-ram;
+};
+
+&aips1 {
+	bootph-pre-ram;
+
+	spba-bus@50000000 {
+		bootph-pre-ram;
+	};
+};
+
+&uart1 {
+	bootph-pre-ram;
+	status = "okay";
+};
+
+/* The ROM doesn't use card detect or write protect GPIOs */
+&esdhc1 {
+	bootph-pre-ram;
+	broken-cd;
+	status = "okay";
+};
+
+&esdhc3 {
+	bootph-pre-ram;
+	broken-cd;
+	status = "okay";
+};

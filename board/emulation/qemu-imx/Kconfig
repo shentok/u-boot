@@ -16,8 +16,10 @@ config SYS_VENDOR
 
 config SYS_CONFIG_NAME
 	default "qemu-imx8m-rom" if ARCH_IMX8M
+	default "qemu-imx53-rom" if MX53
 
 config SPL_LDSCRIPT
 	default "board/emulation/qemu-imx/u-boot-spl-imx8m-rom.lds" if ARCH_IMX8M
+	default "board/emulation/qemu-imx/u-boot-spl-armv7-rom.lds" if MX53
 
 endif
