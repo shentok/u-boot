@@ -37,6 +37,9 @@
 
 #define IRAM_SIZE		0x00020000	/* 128 KB */
 
+#define ROM_BASE_ADDR		0x00000000
+#define ROM_SIZE		0x00100000	/* incl. aliases, 1 MiB aligned */
+
 /*
  * SPBA global module enabled #0
  */

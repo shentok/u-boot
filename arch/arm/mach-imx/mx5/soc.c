@@ -66,8 +66,21 @@ u32 __weak get_board_rev(void)
 #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
 void enable_caches(void)
 {
+#if defined(CONFIG_SYS_ARM_CACHE_WRITETHROUGH)
+	enum dcache_option option = DCACHE_WRITETHROUGH;
+#else
+	enum dcache_option option = DCACHE_WRITEBACK;
+#endif
+
 	/* Enable D-cache. I-cache is already enabled in start.S */
 	dcache_enable();
+
+	/*
+	 * Enable caching on ROM and IRAM, which also allows for executing the
+	 * HAB functions of the ROM
+	 */
+	mmu_set_region_dcache_behaviour(ROM_BASE_ADDR, ROM_SIZE, option);
+	mmu_set_region_dcache_behaviour(IRAM_BASE_ADDR, IRAM_SIZE, option);
 }
 #endif
 
