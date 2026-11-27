@@ -63,6 +63,7 @@ struct imx_boot_data {
 };
 
 struct rom_boot_dev rom_boot_dev;
+struct rom_loader rom_loader;
 gd_t *rom_gd;
 
 void board_boot_order(u32 *spl_boot_list)
@@ -284,6 +285,9 @@ int spl_parse_board_header(struct spl_image_info *spl_image,
 	spl_image->load_addr = ivt->self;
 	spl_image->entry_point = ivt->entry;
 	spl_image->size = bd->size - (ivt->self - bd->start);
+
+	rom_loader.start = spl_image->load_addr;
+	rom_loader.size = spl_image->size;
 
 	log_debug("ROM: IVT entry=0x%08x self=0x%08x size=0x%x\n",
 		  ivt->entry, ivt->self, spl_image->size);

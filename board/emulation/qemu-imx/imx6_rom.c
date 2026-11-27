@@ -11,7 +11,9 @@
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>
 #include <asm/mach-imx/boot_mode.h>
+#include <asm/unaligned.h>
 #include <linux/bitfield.h>
+#include <u-boot/sha256.h>
 #include "qemu_imx_rom.h"
 
 #if IS_ENABLED(CONFIG_XPL_BUILD)
@@ -28,6 +30,8 @@
 	((ulong)OCOTP_BASE_ADDR + 0x400 + ((bank) * 8 + (word)) * 0x10)
 #define OCOTP_SEC_CONFIG		OCOTP_SHADOW(0, 6)
 #define SEC_CONFIG_CLOSED		BIT(1)
+/* SRK_HASH[255:0] is located in bank 3, four bytes per word */
+#define OCOTP_SRK_HASH(i)		OCOTP_SHADOW(3, i)
 
 /*
  * Default: SD card slot of the board, i.e. USDHC3 on the SABRE Lite and
@@ -70,6 +74,14 @@ void rom_detect_boot_device(void)
 bool rom_hab_closed(void)
 {
 	return readl(OCOTP_SEC_CONFIG) & SEC_CONFIG_CLOSED;
+}
+
+void rom_hab_srk_hash(u8 *hash)
+{
+	int i;
+
+	for (i = 0; i < SHA256_SUM_LEN / 4; i++)
+		put_unaligned_le32(readl(OCOTP_SRK_HASH(i)), hash + 4 * i);
 }
 
 int rom_mmc_devnum(void)

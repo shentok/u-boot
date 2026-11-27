@@ -6,8 +6,10 @@
 #include <errno.h>
 #include <asm/io.h>
 #include <asm/arch/imx-regs.h>
+#include <asm/unaligned.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <linux/bitfield.h>
+#include <u-boot/sha256.h>
 #include "qemu_imx_rom.h"
 
 #define SRC_SBMR1			(SRC_BASE_ADDR + 0x58)
@@ -22,6 +24,8 @@
 	((ulong)OCOTP_BASE_ADDR + 0x400 + ((bank) * 4 + (word)) * 0x10)
 #define OCOTP_SEC_CONFIG		OCOTP_SHADOW(1, 3)
 #define SEC_CONFIG_CLOSED		BIT(25)
+/* SRK_HASH[255:0] is located in bank 6 and 7, four bytes per word */
+#define OCOTP_SRK_HASH(i)		OCOTP_SHADOW(6 + (i) / 4, (i) % 4)
 
 /* Default: microSD slot of the EVKs */
 #define DEFAULT_BOOT_TYPE		BOOT_TYPE_SD
@@ -69,6 +73,14 @@ void rom_detect_boot_device(void)
 bool rom_hab_closed(void)
 {
 	return readl(OCOTP_SEC_CONFIG) & SEC_CONFIG_CLOSED;
+}
+
+void rom_hab_srk_hash(u8 *hash)
+{
+	int i;
+
+	for (i = 0; i < SHA256_SUM_LEN / 4; i++)
+		put_unaligned_le32(readl(OCOTP_SRK_HASH(i)), hash + 4 * i);
 }
 
 int rom_mmc_devnum(void)

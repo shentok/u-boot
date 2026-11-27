@@ -12,6 +12,7 @@
 #include <asm/arch/imx-regs.h>
 #include <asm/mach-imx/boot_mode.h>
 #include <linux/bitfield.h>
+#include <u-boot/sha256.h>
 #include "qemu_imx_rom.h"
 
 #if IS_ENABLED(CONFIG_XPL_BUILD)
@@ -27,6 +28,8 @@
 	((ulong)IIM_BASE_ADDR + 0x800 + (bank) * 0x400 + (word) * 4)
 #define IIM_SEC_CONFIG			IIM_FUSE(0, 4)
 #define SEC_CONFIG_CLOSED		BIT(1)
+/* SRK_HASH[255:248] is located in bank 1, SRK_HASH[247:0] in bank 3 */
+#define IIM_SRK_HASH(i)			((i) ? IIM_FUSE(3, i) : IIM_FUSE(1, 1))
 
 /* Silicon revision 2.1 */
 #define ROM_SI_REV_2_1			0x21
@@ -59,6 +62,14 @@ void rom_detect_boot_device(void)
 bool rom_hab_closed(void)
 {
 	return readl(IIM_SEC_CONFIG) & SEC_CONFIG_CLOSED;
+}
+
+void rom_hab_srk_hash(u8 *hash)
+{
+	int i;
+
+	for (i = 0; i < SHA256_SUM_LEN; i++)
+		hash[i] = readl(IIM_SRK_HASH(i));
 }
 
 int rom_mmc_devnum(void)
