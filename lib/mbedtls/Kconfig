@@ -95,6 +95,7 @@ config ASN1_DECODER_LEGACY
 config ASYMMETRIC_PUBLIC_KEY_LEGACY
 	bool "Asymmetric public key crypto with legacy certificate library"
 	depends on LEGACY_CRYPTO && ASYMMETRIC_PUBLIC_KEY_SUBTYPE
+	select IMAGE_SIGN_INFO
 	help
 	  This option chooses legacy certificate library for asymmetric public
 	  key crypto algorithm.
@@ -111,6 +112,7 @@ config X509_CERTIFICATE_PARSER_LEGACY
 	bool "X.509 certificate parser with legacy certificate library"
 	depends on ASYMMETRIC_PUBLIC_KEY_LEGACY
 	select ASN1_DECODER_LEGACY
+	select HASH
 	help
 	  This option chooses legacy certificate library for X509 certificate
 	  parser.
@@ -388,6 +390,8 @@ config SPL_LEGACY_CRYPTO
 	select SPL_ASYMMETRIC_PUBLIC_KEY_LEGACY if \
 		SPL_ASYMMETRIC_PUBLIC_KEY_SUBTYPE
 	select SPL_RSA_PUBLIC_KEY_PARSER_LEGACY if SPL_RSA_PUBLIC_KEY_PARSER
+	select SPL_X509_CERTIFICATE_PARSER_LEGACY if SPL_X509_CERTIFICATE_PARSER
+	select SPL_PKCS7_MESSAGE_PARSER_LEGACY if SPL_PKCS7_MESSAGE_PARSER
 	help
 	  Enable legacy certificate libraries in SPL.
 
@@ -403,6 +407,7 @@ config SPL_ASN1_DECODER_LEGACY
 config SPL_ASYMMETRIC_PUBLIC_KEY_LEGACY
 	bool "Asymmetric public key crypto with legacy certificate library (SPL)"
 	depends on SPL_LEGACY_CRYPTO && SPL_ASYMMETRIC_PUBLIC_KEY_SUBTYPE
+	select SPL_IMAGE_SIGN_INFO
 	help
 	  This option chooses legacy certificate library for asymmetric public
 	  key crypto algorithm in SPL.
@@ -413,6 +418,23 @@ config SPL_RSA_PUBLIC_KEY_PARSER_LEGACY
 	select SPL_ASN1_DECODER_LEGACY
 	help
 	  This option chooses legacy certificate library for RSA public key
+	  parser in SPL.
+
+config SPL_X509_CERTIFICATE_PARSER_LEGACY
+	bool "X.509 certificate parser with legacy certificate library (SPL)"
+	depends on SPL_ASYMMETRIC_PUBLIC_KEY_LEGACY
+	select SPL_ASN1_DECODER_LEGACY
+	select SPL_HASH
+	help
+	  This option chooses legacy certificate library for X509 certificate
+	  parser in SPL.
+
+config SPL_PKCS7_MESSAGE_PARSER_LEGACY
+	bool "PKCS#7 message parser with legacy certificate library (SPL)"
+	depends on SPL_X509_CERTIFICATE_PARSER_LEGACY
+	select SPL_ASN1_DECODER_LEGACY
+	help
+	  This option chooses legacy certificate library for PKCS7 message
 	  parser in SPL.
 
 endif # SPL_LEGACY_CRYPTO

@@ -69,6 +69,18 @@ config X509_CERTIFICATE_PARSER
 	  data and provides the ability to instantiate a crypto key from a
 	  public key packet found inside the certificate.
 
+config SPL_X509_CERTIFICATE_PARSER
+	bool "X.509 certificate parser within SPL"
+	depends on SPL_ASYMMETRIC_PUBLIC_KEY_SUBTYPE
+	select SPL_ASN1_DECODER
+	select ASN1_COMPILER
+	select SPL_OID_REGISTRY
+	select LIB_DATE
+	help
+	  This option provides support for parsing X.509 format blobs for key
+	  data and provides the ability to instantiate a crypto key from a
+	  public key packet found inside the certificate in the SPL.
+
 config PKCS7_MESSAGE_PARSER
 	bool "PKCS#7 message parser"
 	depends on X509_CERTIFICATE_PARSER
@@ -78,6 +90,16 @@ config PKCS7_MESSAGE_PARSER
 	help
 	  This option provides support for parsing PKCS#7 format messages for
 	  signature data and provides the ability to verify the signature.
+
+config SPL_PKCS7_MESSAGE_PARSER
+	bool "PKCS#7 message parser within SPL"
+	depends on SPL_X509_CERTIFICATE_PARSER
+	select SPL_ASN1_DECODER
+	select ASN1_COMPILER
+	select SPL_OID_REGISTRY
+	help
+	  This option provides support for parsing PKCS#7 format messages for
+	  signature data in the SPL.
 
 config PKCS7_VERIFY
 	bool
