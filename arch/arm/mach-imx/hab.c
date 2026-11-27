@@ -880,8 +880,7 @@ bool imx_hab_is_enabled(void)
 {
 	struct imx_fuse *sec_config =
 		(struct imx_fuse *)&imx_sec_config_fuse;
-	struct imx_fuse *field_return =
-		(struct imx_fuse *)&imx_field_return_fuse;
+	struct imx_fuse *field_return;
 	uint32_t reg;
 	bool is_enabled;
 	int ret;
@@ -892,7 +891,9 @@ bool imx_hab_is_enabled(void)
 		return ret;
 	}
 	is_enabled = reg & IS_HAB_ENABLED_BIT;
-	if (is_enabled) {
+	/* i.MX53 has no field return fuse */
+	if (is_enabled && !IS_ENABLED(CONFIG_ARCH_MX5)) {
+		field_return = (struct imx_fuse *)&imx_field_return_fuse;
 		ret = fuse_read(field_return->bank, field_return->word, &reg);
 		if (ret) {
 			puts("Field return fuse read error\n");
@@ -921,7 +922,10 @@ int imx_hab_authenticate_image(uint32_t ddr_start, uint32_t image_size,
 	printf("\nAuthenticate image from DDR location 0x%x...\n",
 	       ddr_start);
 
+	/* The SAHARA used by HAB on i.MX53 is clocked after reset */
+#if !defined(CONFIG_ARCH_MX5)
 	hab_caam_clock_enable(1);
+#endif
 
 	/* Calculate IVT address header */
 	ivt_addr = (ulong) (ddr_start + ivt_offset);

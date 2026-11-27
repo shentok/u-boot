@@ -15,9 +15,18 @@
 #include <linux/errno.h>
 #include <asm/io.h>
 #include <asm/mach-imx/boot_mode.h>
+#include <asm/mach-imx/hab.h>
 
 #if !(defined(CONFIG_MX51) || defined(CONFIG_MX53))
 #error "CPU_TYPE not defined"
+#endif
+
+#if defined(CONFIG_IMX_HAB)
+/* SEC_CONFIG[1] closes the device */
+struct imx_fuse const imx_sec_config_fuse = {
+	.bank = 0,
+	.word = 4,
+};
 #endif
 
 u32 get_cpu_rev(void)
